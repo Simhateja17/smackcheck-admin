@@ -1,0 +1,1 @@
+# smackcheck-admin
