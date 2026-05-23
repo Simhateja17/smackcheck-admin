@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { I } from '../icons';
-import { Badge, StatusBadge, Select, fmt } from '../ui';
+import { StatusBadge, Select, fmt } from '../ui';
 import { DISHES, Dish } from '@/lib/data';
 
 function DishCard({ d, onClick }: { d: Dish; onClick: () => void }) {
