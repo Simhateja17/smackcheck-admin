@@ -5,6 +5,9 @@ import { I } from '../icons';
 import { Avatar, Badge, StatusBadge, Stars, Mini, TLRow, DetailRow, Th, fmt, ago } from '../ui';
 import { USERS, DISHES, BADGES, REPORTS, User } from '@/lib/data';
 
+type UserSortKey = keyof Pick<User, "name" | "status" | "level" | "xp" | "ratings" | "reports" | "lastActive">;
+type SortState = { key: UserSortKey; dir: 'asc' | 'desc' };
+
 function UserDrawer({ u, onClose }: { u: User | null; onClose: () => void }) {
   const [tab, setTab] = useState("overview");
   const lastUserRef = useRef<User>(USERS[0]);
@@ -159,7 +162,7 @@ export default function UsersPage() {
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' }>({ key: "xp", dir: "desc" });
+  const [sort, setSort] = useState<SortState>({ key: "xp", dir: "desc" });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
@@ -174,8 +177,8 @@ export default function UsersPage() {
       return true;
     });
     list = [...list].sort((a, b) => {
-      const av = (a as Record<string, unknown>)[sort.key];
-      const bv = (b as Record<string, unknown>)[sort.key];
+      const av = a[sort.key];
+      const bv = b[sort.key];
       if (typeof av === "number" && typeof bv === "number") return sort.dir === "asc" ? av - bv : bv - av;
       return sort.dir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
     });
@@ -184,7 +187,7 @@ export default function UsersPage() {
 
   const counts = useMemo(() => USERS.reduce((acc: Record<string, number>, u) => { acc[u.status] = (acc[u.status] || 0) + 1; return acc; }, {}), []);
 
-  const toggleSort = (key: string) => setSort(s => s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" });
+  const toggleSort = (key: UserSortKey) => setSort(s => s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" });
 
   return (
     <div className="page">
