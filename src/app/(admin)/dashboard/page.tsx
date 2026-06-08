@@ -1,2 +1,2 @@
-import Dashboard from '@/components/pages/Dashboard';
-export default Dashboard;
+import { LiveDashboard } from '@/components/pages/LiveAdminPages';
+export default LiveDashboard;

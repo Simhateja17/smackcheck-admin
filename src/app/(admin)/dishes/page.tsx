@@ -1,2 +1,2 @@
-import DishesPage from '@/components/pages/Dishes';
-export default DishesPage;
+import { LiveDishes } from '@/components/pages/LiveAdminPages';
+export default LiveDishes;

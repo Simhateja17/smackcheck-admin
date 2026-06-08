@@ -1,2 +1,2 @@
-import ModLogs from '@/components/pages/ModLogs';
-export default ModLogs;
+import { LiveLogs } from '@/components/pages/LiveAdminPages';
+export default LiveLogs;

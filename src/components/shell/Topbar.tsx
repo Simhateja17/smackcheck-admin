@@ -5,15 +5,21 @@ import { usePathname } from 'next/navigation';
 import { I } from '../icons';
 import { Avatar } from '../ui';
 import { NAV_ROUTES } from '@/lib/nav';
-import { AVATAR_URL } from '@/lib/data';
+import { AdminProfile } from '@/lib/adminApi';
 
 interface TopbarProps {
   onCmd: () => void;
+  adminUser: AdminProfile | null;
 }
 
-export default function Topbar({ onCmd }: TopbarProps) {
+function adminDisplayName(user: AdminProfile | null) {
+  return user?.name || user?.username || user?.email || 'Admin';
+}
+
+export default function Topbar({ onCmd, adminUser }: TopbarProps) {
   const pathname = usePathname();
   const item = NAV_ROUTES.find(n => pathname === n.href || (n.href !== '/' && pathname.startsWith(n.href)));
+  const name = adminDisplayName(adminUser);
 
   return (
     <header className="topbar">
@@ -39,7 +45,7 @@ export default function Topbar({ onCmd }: TopbarProps) {
         <I.Bell size={16} />
         <span className="dot" />
       </button>
-      <Avatar name="Alex Chen" src={AVATAR_URL("alexadmin")} size="md" />
+      <Avatar name={name} src={adminUser?.profile_photo_url || undefined} size="md" />
     </header>
   );
 }

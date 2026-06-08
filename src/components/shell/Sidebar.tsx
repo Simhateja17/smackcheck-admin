@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { I } from '../icons';
 import { Avatar } from '../ui';
 import { NAV_ROUTES, NAV_GROUPS } from '@/lib/nav';
-import { AVATAR_URL } from '@/lib/data';
+import { AdminProfile } from '@/lib/adminApi';
 
 // Map nav ids to icon components
 const NAV_ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -28,10 +28,21 @@ interface SidebarProps {
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
   onLogout: () => void;
+  adminUser: AdminProfile | null;
 }
 
-export default function Sidebar({ collapsed, setCollapsed, onLogout }: SidebarProps) {
+function adminDisplayName(user: AdminProfile | null) {
+  return user?.name || user?.username || user?.email || 'Admin';
+}
+
+function adminSubtitle(user: AdminProfile | null) {
+  return user?.email || (user?.is_admin ? 'Admin' : 'Signed in');
+}
+
+export default function Sidebar({ collapsed, setCollapsed, onLogout, adminUser }: SidebarProps) {
   const pathname = usePathname();
+  const name = adminDisplayName(adminUser);
+  const subtitle = adminSubtitle(adminUser);
 
   return (
     <aside className="sidebar" style={collapsed ? { width: 72 } : {}}>
@@ -83,11 +94,11 @@ export default function Sidebar({ collapsed, setCollapsed, onLogout }: SidebarPr
       </nav>
 
       <div className="sb-footer" style={collapsed ? { flexDirection: "column", gap: 8 } : {}}>
-        <Avatar name="Alex Chen" src={AVATAR_URL("alexadmin")} size="md" />
+        <Avatar name={name} src={adminUser?.profile_photo_url || undefined} size="md" />
         {!collapsed && (
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 600, fontSize: 13, color: "var(--ink)" }}>Alex Chen</div>
-            <div style={{ fontSize: 11.5, color: "var(--mute)" }}>Senior Moderator</div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: "var(--ink)" }}>{name}</div>
+            <div className="truncate" style={{ fontSize: 11.5, color: "var(--mute)", maxWidth: 128 }}>{subtitle}</div>
           </div>
         )}
         <button className="icon-btn" style={{ width: 28, height: 28 }} title="Sign out" onClick={onLogout}>

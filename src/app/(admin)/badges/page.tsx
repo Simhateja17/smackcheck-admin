@@ -1,2 +1,2 @@
-import BadgesPage from '@/components/pages/Badges';
-export default BadgesPage;
+import { LiveBadges } from '@/components/pages/LiveAdminPages';
+export default LiveBadges;

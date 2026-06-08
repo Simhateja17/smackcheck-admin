@@ -1,2 +1,2 @@
-import UsersPage from '@/components/pages/Users';
-export default UsersPage;
+import { LiveUsers } from '@/components/pages/LiveAdminPages';
+export default LiveUsers;

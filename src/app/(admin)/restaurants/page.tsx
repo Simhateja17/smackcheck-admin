@@ -1,2 +1,2 @@
-import RestaurantsPage from '@/components/pages/Restaurants';
-export default RestaurantsPage;
+import { LiveRestaurants } from '@/components/pages/LiveAdminPages';
+export default LiveRestaurants;

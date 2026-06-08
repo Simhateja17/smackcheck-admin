@@ -1,2 +1,2 @@
-import NotificationsPage from '@/components/pages/Notifications';
-export default NotificationsPage;
+import { LiveNotifications } from '@/components/pages/LiveAdminPages';
+export default LiveNotifications;

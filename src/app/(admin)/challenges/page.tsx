@@ -1,2 +1,2 @@
-import ChallengesPage from '@/components/pages/Challenges';
-export default ChallengesPage;
+import { LiveChallenges } from '@/components/pages/LiveAdminPages';
+export default LiveChallenges;

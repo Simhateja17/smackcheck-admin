@@ -5,23 +5,36 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/shell/Sidebar';
 import Topbar from '@/components/shell/Topbar';
 import CommandPalette from '@/components/shell/CommandPalette';
+import { AdminProfile, getAdminMe } from '@/lib/adminApi';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [adminUser, setAdminUser] = useState<AdminProfile | null>(null);
 
   useEffect(() => {
-    if (localStorage.getItem('sc_admin_auth') !== '1') {
-      router.replace('/login');
-    } else {
-      setAuthChecked(true);
-    }
+    let alive = true;
+
+    getAdminMe()
+      .then(user => {
+        if (!alive) return;
+        setAdminUser(user);
+        setAuthChecked(true);
+      })
+      .catch(() => {
+        if (alive) router.replace('/login');
+      });
+
+    return () => {
+      alive = false;
+    };
   }, [router]);
 
-  const logout = () => {
-    localStorage.removeItem('sc_admin_auth');
+  const logout = async () => {
+    await supabase?.auth.signOut();
     router.push('/login');
   };
 
@@ -35,9 +48,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="app" style={{ "--sidebar-w": (collapsed ? "72px" : "248px") } as React.CSSProperties}>
-      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} onLogout={logout} />
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} onLogout={logout} adminUser={adminUser} />
       <main className="main">
-        <Topbar onCmd={() => setCmdOpen(true)} />
+        <Topbar onCmd={() => setCmdOpen(true)} adminUser={adminUser} />
         <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           {children}
         </div>

@@ -1,2 +1,2 @@
-import Analytics from '@/components/pages/Analytics';
-export default Analytics;
+import { LiveAnalytics } from '@/components/pages/LiveAdminPages';
+export default LiveAnalytics;

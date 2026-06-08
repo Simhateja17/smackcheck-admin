@@ -3,28 +3,65 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { I } from '@/components/icons';
+import { getAdminMe } from '@/lib/adminApi';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("alex@smackcheck.com");
-  const [pwd, setPwd] = useState("••••••••••••");
+  const [email, setEmail] = useState("");
+  const [pwd, setPwd] = useState("");
   const [show, setShow] = useState(false);
   const [step, setStep] = useState<"creds" | "mfa">("creds");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    if (!isSupabaseConfigured || !supabase) {
+      setError('Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY first.');
+      return;
+    }
     setLoading(true);
-    setTimeout(() => { setLoading(false); setStep("mfa"); }, 700);
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: pwd,
+      });
+      if (signInError) throw signInError;
+      await getAdminMe();
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sign in failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const verify = () => {
+  const verify = async () => {
     setLoading(true);
-    setTimeout(() => {
-      localStorage.setItem('sc_admin_auth', '1');
+    try {
+      await getAdminMe();
       router.push('/dashboard');
-    }, 500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Admin verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    setError(null);
+    if (!isSupabaseConfigured || !supabase) {
+      setError('Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY first.');
+      return;
+    }
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    });
+    if (oauthError) setError(oauthError.message);
   };
 
   return (
@@ -113,13 +150,14 @@ export default function LoginPage() {
                 {loading ? "Signing in…" : "Sign in"}
                 {!loading && <I.ArrowRight size={15} />}
               </button>
+              {error && <div style={{ marginTop: 12, color: "var(--danger)", fontSize: 12.5 }}>{error}</div>}
 
               <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "22px 0 16px" }}>
                 <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
                 <span style={{ fontSize: 11, color: "var(--mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>or</span>
                 <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
               </div>
-              <button type="button" className="btn btn-secondary lg w-full">
+              <button type="button" className="btn btn-secondary lg w-full" onClick={signInWithGoogle}>
                 <span style={{ width: 16, height: 16, background: "var(--ink)", borderRadius: 4, display: "inline-grid", placeItems: "center", color: "white", fontSize: 10, fontWeight: 700 }}>G</span>
                 Continue with Google SSO
               </button>
@@ -154,6 +192,7 @@ export default function LoginPage() {
               <button className="btn btn-primary lg w-full" onClick={verify} disabled={loading}>
                 {loading ? "Verifying…" : "Verify and continue"}
               </button>
+              {error && <div style={{ marginTop: 12, color: "var(--danger)", fontSize: 12.5 }}>{error}</div>}
               <button className="btn btn-ghost w-full" onClick={() => setStep("creds")} style={{ marginTop: 8 }}>← Back</button>
             </div>
           )}
